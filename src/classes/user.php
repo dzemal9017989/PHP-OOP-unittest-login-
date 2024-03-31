@@ -54,9 +54,9 @@
             if($this->username != "" || $this->password != ""){
 
                 // Check user exist
+                $userExists = $this->GetUser($this->username);
 
-
-                if(false){
+                if($userExists){
                     array_push($errors, "Username bestaat al.");
                 } else {
 
@@ -66,6 +66,7 @@
                     $sql = "INSERT INTO user VALUES (:name, :pwd)";
 
                     $query = $this->conn->prepare($sql);
+
                     $query->execute([
                         'name'=>$this->username,
                         'pwd'=>$this->password
@@ -87,9 +88,11 @@
             }
 
             // Test username > 3 tekens en < 50 tekens
-            $len_username = strlen($this->username);
+            if (strlen($this->username) < 3 || strlen($this->username) > 50) {
+                array_push($errors, "Username moet > 3 en < 50 tekens zijn.");
+            }
 
-            
+
             return $errors;
         }
 
@@ -97,10 +100,10 @@
 
         
             // Zoek user in de table user
-           echo "Username:" . $this->username;
+        //    echo "Username:" . $this->username;
 
            $sql = "SELECT * FROM user WHERE username= :name AND password= :pwd ";
-			$query = $conn->prepare($sql);
+			$query = $this->conn->prepare($sql);
 			$query->execute([
 				'name'=>$this->username,
 				'pwd'=>$this->password
@@ -127,18 +130,21 @@
         // Check if the user is already logged in
         public function IsLoggedin() {
             // Check if user session has been set
-
-            
-
-            return false;
+            return isset($_SESSION['user']);
         }
 
         public function GetUser($username){
-            
 		    // Doe SELECT * from user WHERE username = $username
-            if (false){
+            $sql = "SELECT username FROM user WHERE username= :name";
+                $query = $this->conn->prepare($sql);
+                $query->execute([
+                    'name'=>$username,
+                    ]);
+            
+                $user = $query->fetch()[0];
+            if ($user){
                 //Indien gevonden eigenschappen vullen met waarden uit de SELECT
-                $this->username = 'Waarde uit de database';
+                return $this->username = $user;
             } else {
                 return NULL;
             }   
